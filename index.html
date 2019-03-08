@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Omar's Notes App</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+	 crossorigin="anonymous">
+
+
+	<style>
+		.content {
+			display: none;
+			margin: 1em;
+		}
+    #list p {
+      border-bottom: solid gray 2px;
+    }
+	</style>
+
+</head>
+
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="#">Omar's Note App</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+    </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#home">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#list">List</a>
+      </li>
+    </ul>
+  </div>
+  </nav>
+  <div class="content" id="home">
+    Create A Note!
+    <br>
+    <input type="text" id="subject" placeholder="Enter a subject"><br>
+    <textarea id="content" placeholder="Enter the content"></textarea><br>
+    <button id="saveNote">Save</button>
+  </div>
+  <div class="content" id="list">
+    Note's List
+  </div>
+  <div class="content" id="screen3">
+    Display Note
+  </div>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+      
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+
+    <script>
+
+      var 
+      // loop through notes
+      db = new Dexie("notes_database");
+      
+      // loop through notes
+      db.version(1).stores({
+          notes: "++id,subject"
+      });
+
+    
+      
+
+
+      $(document).ready(function() {
+
+        $("#home").show();
+
+
+        function hideScreens() {
+          $(".content").hide();
+        }
+
+
+        function loadNotesList() {
+          // clear contents
+          $("#list").empty();
+          // loop through notes
+          db.notes.each(function(note) {
+            
+            var p = $("<p>");
+            p.attr("data-id",note.id);
+            p.addClass("list-note");
+            p.text(note.subject); 
+            $("#list").append(p);
+          });
+        }
+
+        $("body").on("click", ".list-note", function(){
+            //console.log($(this)[0]);
+            $("#screen3").empty();
+            var myID = parseInt($(this).attr("data-id")[0]);
+
+            db.notes.each(function(note) {
+            
+                if (myID == note.id){
+                   var sub = $("<h>");
+                   sub.text("Subject: " + note.subject); 
+                   $("#screen3").append(sub);
+                   var content = $("<p>");
+                   content.text(note.content); 
+                   $("#screen3").append(content);
+                }
+           });
+            
+            hideScreens();
+            $("#screen3").show();
+
+        });
+
+        $(".nav-link").on("click", function(){
+          hideScreens();
+          var target = $(this).attr("href");
+          $(target).show();
+
+          if(target == "#list") {
+            loadNotesList();
+          }
+
+
+
+        });
+
+        $("#saveNote").on("click", function() {
+          var subject = $("#subject").val();
+          var content = $("#content").val();
+          
+          // loop through notes
+          db.notes.put({subject: subject, content: content, date: new Date()});
+        });
+
+      });
+    </script>
+
+    <script>
+        // register the service worker for offline use
+        if('serviceWorker' in navigator) {
+          navigator.serviceWorker
+                   .register('./sw.js')
+                   .then(function() { console.log("Service Worker Registered"); });
+        }
+    </script>
+    
+  </body>
+</html>
