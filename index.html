@@ -111,6 +111,9 @@
                    var content = $("<p>");
                    content.text(note.content); 
                    $("#screen3").append(content);
+                   var time = $("<p>");
+                   time.text(note.date); 
+                   $("#screen3").append(time);
                 }
            });
             
@@ -135,7 +138,7 @@
         $("#saveNote").on("click", function() {
           var subject = $("#subject").val();
           var content = $("#content").val();
-          
+          var time = $.now();
           // loop through notes
           db.notes.put({subject: subject, content: content, date: new Date()});
         });
